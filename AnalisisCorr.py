@@ -21,12 +21,13 @@ raw['fechahora'] = pd.to_datetime(
 # %%
 raw.index = pd.date_range(start=raw.index.min(),
                           periods=len(raw), freq='60Min')
-raw['COST_SHIFT_1H'] = raw['COST'].shift(periods=1, freq='H')
-raw['COST_SHIFT_2H'] = raw['COST'].shift(periods=2, freq='H')
-raw['COST_SHIFT_3H'] = raw['COST'].shift(periods=3, freq='H')
-raw['COST_SHIT_4H'] = raw['COST'].shift(periods=4, freq='H')
+raw['COST_SHIFT_1H'] = raw['COST'].shift(periods=-1, freq='H')
+raw['COST_SHIFT_2H'] = raw['COST'].shift(periods=-2, freq='H')
+raw['COST_SHIFT_3H'] = raw['COST'].shift(periods=-3, freq='H')
+raw['COST_SHIT_4H'] = raw['COST'].shift(periods=-4, freq='H')
 raw.set_index('fechahora').dropna()
-
+raw['CostoMañana'] = raw['COST'].shift(periods=1, freq='D')
+raw.dropna(inplace=True)
 #%%
 raw['pctCOST'] = raw['COST'].pct_change()
 raw['pctTROAS'] = raw['TROAS'].pct_change()
@@ -35,11 +36,39 @@ sns.heatmap(raw.corr(), annot=True)
 #%%
 # %%
 file = raw.copy().dropna()
+
+
+
+
+## BORRAR
+
+# analisis = raw.copy().dropna()
+# analisis.set_index('fechahora',drop=True, inplace=True)
+
+# costo =  analisis[['COST']]
+# costo['mañana'] = costo['COST'].shift(periods=-1 , freq='D')
+# costo = costo.dropna()
+
+## BORRAR
+
+
+
+
+
+
+
+
+
+
+
+
 #%%
 # Calculamos un promedio del costo con un rolling window para tener de referencia
 # ¿Cuánto mejor es nuestro modelo que tirar el promedio?
 file['average'] = np.array(file.set_index(['TIM_DAY']).sort_index(ascending=False)[
                            'COST'].rolling(14).mean().sort_index(ascending=True).copy())
+
+backup = file.copy()
 file.drop(columns=['DIASEM', 'TIM_HOUR',
                    'ACCOUNT_NAME', 'TIM_DAY', 'date','fechahora'], inplace=True)
 #%%
@@ -47,17 +76,19 @@ file.dropna(inplace=True)
 
 # %%
 # Usamos One-Hot encoding para las variables categoricas (en este caso dia semana)
-
+file.drop(columns=['pctCOST'], inplace=True)
 
 features = pd.get_dummies(file)
 
 # %%
 
+VarInteres = 'CostoMañana'
+
 # labels : lo que queremos predecir, en este caso es el costo de Search
-labels = np.array(features['COST'])
+labels = np.array(features[VarInteres])
 # Tenemos que sacar costo de los features
 # usamos axis = 1 para dropear a nivel columna
-features = features.drop('COST', axis=1)
+features = features.drop(VarInteres, axis=1)
 # Nos guardamos la lista de los features
 feature_list = list(features.columns)
 # Convertimos los features a np arrays
@@ -154,5 +185,21 @@ fig.add_scatter(x=raw['fechahora'], y=raw['TROAS'].pct_change()) # Not what is d
 
 # Show plot 
 fig.show()
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
