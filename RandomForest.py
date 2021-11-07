@@ -63,7 +63,7 @@ def valorAnterior(df1,dias):
 
 # %%
 # IMPORT FILE & CREATE DATETIME
-raw = pd.read_csv('hogar.csv')
+raw = pd.read_csv('celulares.csv')
 raw['date'] = pd.to_datetime(raw['TIM_DAY'])
 raw['fechahora'] = pd.to_datetime(
     raw['date']) + raw['TIM_HOUR'].astype('timedelta64[h]')
